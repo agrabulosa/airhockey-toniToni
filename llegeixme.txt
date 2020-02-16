@@ -1,0 +1,12 @@
+Aloha,
+
+He seguit aquest tutorial per entendre 
+de què va el tema multiplayer amb Phaser 3!
+
+Seguim! :-)
+
+
+
+https://gamedevacademy.org/create-a-basic-multiplayer-game-in-phaser-3-with-socket-io-part-1/
+
+https://gamedevacademy.org/create-a-basic-multiplayer-game-in-phaser-3-with-socket-io-part-2/
