@@ -20,6 +20,7 @@ server.listen(8081, ip_local, function () {
 
 
 var players = {};
+
 var puck = {};
 server.lastPlayer = 0;
 
@@ -66,16 +67,25 @@ io.on('connection', function (socket) {
         players[id].puckMaster = false;
       }
     });
-
     socket.broadcast.emit('puckMaster');
-  
   });
-
+  //Enviem dades de moviment de Puck.
   socket.on('puckMovement', function(movementData) {
     puck.x = movementData.x;
     puck.y = movementData.y;
     // console.log(movementData);
     socket.broadcast.emit('puckMoved', puck);
+  });
+
+  //Sistema de gols i puntuació.
+  socket.on("goalLeft", function(){
+    console.log("goal left");
+    socket.emit("goalLeft");
+  });
+
+  socket.on("goalRight", function(){
+    console.log("goal right");
+    
   });
 
 });

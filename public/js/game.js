@@ -51,6 +51,11 @@ function create() {
     this.goalLeft.left = true;
     this.goalRight = this.add.sprite(this.cameras.main.width - 6, this.cameras.main.centerY, 'goalRight');
     this.goalRight.left = false;
+    this.goals = this.add.group();
+    this.goals.add(this.goalLeft);
+    this.goals.add(this.goalRight);
+    this.physics.world.enableBody(this.goalLeft);
+    this.physics.world.enableBody(this.goalRight);
 
     //Coloquem la pilota/disc a l'escena:
     this.puck = this.physics.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, 'puck');
@@ -61,7 +66,7 @@ function create() {
     this.puck.setBounce(0.8, 0.8);
     this.puck.setCollideWorldBounds(true);
 
-
+    this.physics.add.overlap(this.puck, this.goals, overlapGoals, null, this);
 
     this.otherPlayers = this.physics.add.group();
 
@@ -109,9 +114,12 @@ function create() {
     });
 
 
+    //Puntuacio
+    this.player1ScoreText;
+    this.player2ScoreText;
 
-
-
+    crearPuntuacio(self);
+    
 }
 
 function update() {
@@ -170,7 +178,7 @@ function update() {
                     y: this.puck.y
                 })
             }
-    
+
             // save old puck position data
             this.puck.oldPosition = {
                 x: this.puck.x,
@@ -231,4 +239,22 @@ function setPuckMaster(game) {
     game.scene.socket.emit('setPuckMaster', {
         master: true
     });
+}
+
+function overlapGoals(puck, goal) {
+    this.puck.body.stop();
+    this.puck.setPosition(this.cameras.main.centerX, this.cameras.main.centerY);
+    
+    if(goal.left) {
+        this.socket.emit("goalLeft");
+    } else if (!goal.left) {        
+        this.socket.emit("goalRight");
+    }
+}
+
+function crearPuntuacio(self) {
+    //Revisar posicions
+    self.player1ScoreText = self.add.text(20, 16, 'Jugador 1: 0', { fontSize: '32px', fill: '#FFF' });
+    self.player2ScoreText = self.add.text(config.width-300, 16, 'Jugador 2: 0', { fontSize: '32px', fill: '#FFF' });
+
 }
