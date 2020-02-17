@@ -119,13 +119,17 @@ function create() {
     this.player2ScoreText;
 
     crearPuntuacio(self);
+
+    this.socket.on("puntuacioUpdate", function(puntuacio) {
+        self.player1ScoreText.text = 'Jugador 1: ' + puntuacio.puntuacioLeft;
+        self.player2ScoreText.text = 'Jugador 2: ' + puntuacio.puntuacioRight;
+    });
     
 }
 
 function update() {
 
     if (this.paddle) {
-        console.log(this.paddle.scene.paddle.puckMaster);
         if (this.cursors.left.isDown) {
             this.paddle.setVelocityX(-150);
         } else if (this.cursors.right.isDown) {
@@ -187,9 +191,6 @@ function update() {
         }
     }
 
-    
-
-
 }
 
 function addPlayer(self, playerInfo) {
@@ -199,10 +200,6 @@ function addPlayer(self, playerInfo) {
     } else {
         self.paddle.setTint(0xFF0000);
     }
-
-    //self.paddle.setDrag(100);
-    //self.paddle.setAngularDrag(100);
-    //self.paddle.setMaxVelocity(400);
 
     self.paddle.puckMaster = false;
 
@@ -246,7 +243,7 @@ function overlapGoals(puck, goal) {
     this.puck.setPosition(this.cameras.main.centerX, this.cameras.main.centerY);
     
     if(goal.left) {
-        this.socket.emit("goalLeft");
+        this.socket.emit("goalLeft", );
     } else if (!goal.left) {        
         this.socket.emit("goalRight");
     }
@@ -256,5 +253,4 @@ function crearPuntuacio(self) {
     //Revisar posicions
     self.player1ScoreText = self.add.text(20, 16, 'Jugador 1: 0', { fontSize: '32px', fill: '#FFF' });
     self.player2ScoreText = self.add.text(config.width-300, 16, 'Jugador 2: 0', { fontSize: '32px', fill: '#FFF' });
-
 }

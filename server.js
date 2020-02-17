@@ -20,8 +20,8 @@ server.listen(8081, ip_local, function () {
 
 
 var players = {};
-
 var puck = {};
+var puntuacio = {};
 server.lastPlayer = 0;
 
 io.on('connection', function (socket) {
@@ -78,14 +78,19 @@ io.on('connection', function (socket) {
   });
 
   //Sistema de gols i puntuació.
+  puntuacio = {
+    puntuacioLeft: 0,
+    puntuacioRight: 0,
+  };
+
   socket.on("goalLeft", function(){
-    console.log("goal left");
-    socket.emit("goalLeft");
+    puntuacio.puntuacioLeft += 1;
+    io.emit("puntuacioUpdate", puntuacio);
   });
 
   socket.on("goalRight", function(){
-    console.log("goal right");
-    
+    puntuacio.puntuacioRight += 1;
+    io.emit("puntuacioUpdate", puntuacio);
   });
 
 });
