@@ -34,7 +34,7 @@ function preload() {
     //Goals
     this.load.image('goalLeft', 'assets/blueGoal.png');
     this.load.image('goalRight', 'assets/redGoal.png');
-    
+
     //Player
     this.load.image('paddle', 'assets/paddle.png');
 
@@ -54,7 +54,7 @@ function create() {
 
     //Coloquem la pilota/disc a l'escena:
     this.puck = this.physics.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, 'puck');
-    
+
     //Creem colisions.
     this.physics.world.enableBody(this.puck);
     this.puck.setCircle(21);
@@ -68,9 +68,8 @@ function create() {
 
     this.socket = io();
 
-    
-    this.socket.on('currentPlayers', function (players) 
-    {
+
+    this.socket.on('currentPlayers', function (players) {
         Object.keys(players).forEach(function (id) {
             if (players[id].playerId === self.socket.id) {
                 addPlayer(self, players[id]);
@@ -79,8 +78,8 @@ function create() {
             }
         });
     });
-    
-    
+
+
     this.socket.on('newPlayer', function (playerInfo) {
         addOtherPlayers(self, playerInfo);
     });
@@ -105,16 +104,20 @@ function create() {
         });
     });
 
-
-    this.socket.on('puckMoved', function(puckInfo) {
+    this.socket.on('puckMoved', function (puckInfo) {
         puckMovementUpdate(self, puckInfo);
     });
+
+
+
+
 
 }
 
 function update() {
 
     if (this.paddle) {
+        console.log(this.paddle.scene.paddle.puckMaster);
         if (this.cursors.left.isDown) {
             this.paddle.setVelocityX(-150);
         } else if (this.cursors.right.isDown) {
@@ -149,23 +152,35 @@ function update() {
             x: this.paddle.x,
             y: this.paddle.y,
         };
+
+        //Definim puckMaster
+        this.socket.on('puckMaster', function () {
+
+            game.scene.scenes[0].paddle.puckMaster = false;
+
+        });
+
+        if (game.scene.scenes[0].paddle.puckMaster) {
+            // emit puck movement
+            var puckX = this.puck.x;
+            var puckY = this.puck.y;
+            if (this.puck.oldPosition && (puckX !== this.puck.oldPosition.x || puckY !== this.puck.oldPosition.y)) {
+                this.socket.emit('puckMovement', {
+                    x: this.puck.x,
+                    y: this.puck.y
+                })
+            }
+    
+            // save old puck position data
+            this.puck.oldPosition = {
+                x: this.puck.x,
+                y: this.puck.y
+            };
+        }
     }
 
-    // emit puck movement
-    var puckX = this.puck.x;
-    var puckY = this.puck.y;
-    if (this.puck.oldPosition && (puckX !== this.puck.oldPosition.x  || puckY !== this.puck.oldPosition.y)) {
-        this.socket.emit('puckMovement', {
-            x: this.puck.x,
-            y: this.puck.y
-        })
-    }
+    
 
-    // save old puck position data
-    this.puck.oldPosition = {
-        x: this.puck.x,
-        y: this.puck.y
-    };
 
 }
 
@@ -181,6 +196,8 @@ function addPlayer(self, playerInfo) {
     //self.paddle.setAngularDrag(100);
     //self.paddle.setMaxVelocity(400);
 
+    self.paddle.puckMaster = false;
+
     //Colisions entre el player i puck
     self.physics.world.enableBody(self.paddle);
     self.paddle.setCollideWorldBounds(true);
@@ -188,7 +205,7 @@ function addPlayer(self, playerInfo) {
 
     //Afegim overlap entre paddle i puck i cridem la funció setPuckMaster per definir qui envía informació d'ubicació de la pilota.
     self.physics.add.overlap(self.paddle, self.puck, setPuckMaster, null, self);
-    
+
 }
 
 function addOtherPlayers(self, playerInfo) {
@@ -203,13 +220,15 @@ function addOtherPlayers(self, playerInfo) {
 }
 
 //Actualitza la posició de la Puck en el joc
-function puckMovementUpdate(self, puckInfo) {    
+function puckMovementUpdate(self, puckInfo) {
     self.puck.x = puckInfo.x;
     self.puck.y = puckInfo.y;
 }
 
 //Enviem el valor true, per què el servidor estableixi quí es el puckMaster.
 function setPuckMaster(game) {
-    game.scene.socket.emit('setPuckMaster', {master: true});
+    game.scene.paddle.puckMaster = true;
+    game.scene.socket.emit('setPuckMaster', {
+        master: true
+    });
 }
-

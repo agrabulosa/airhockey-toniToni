@@ -4,7 +4,7 @@ var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 
 //CAL OMPLENAR AQUESTA DADA A MÀ:
-var ip_local = '192.168.1.15';
+var ip_local = '192.168.173.198';
 
 app.use(express.static(__dirname + '/public'));
 
@@ -66,6 +66,8 @@ io.on('connection', function (socket) {
         players[id].puckMaster = false;
       }
     });
+
+    socket.broadcast.emit('puckMaster');
   
   });
 
